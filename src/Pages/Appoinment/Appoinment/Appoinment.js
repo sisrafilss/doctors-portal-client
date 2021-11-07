@@ -11,7 +11,7 @@ const Appoinment = () => {
 		<div>
 			<Navigation />
 			<AppoinmentHeader date={date} setDate={setDate} />
-			<AvailabeAppoinment date={date.toDateString()} />
+			<AvailabeAppoinment date={date} />
 			<Footer />
 		</div>
 	);

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import Backdrop from "@mui/material/Backdrop";
 import Box from "@mui/material/Box";
 import Modal from "@mui/material/Modal";
@@ -26,12 +26,49 @@ const BookingModal = ({
 	name,
 	time,
 	date,
+	setBookingSuccess,
 }) => {
 	const { user } = useAuth();
+	const initialInfo = {
+		patientName: user?.displayName,
+		email: user?.email,
+		phone: "",
+	};
+	const [bookingInfo, setBookingInfo] = useState(initialInfo);
+
+	const handleOnBlur = (e) => {
+		const field = e.target.name;
+		const value = e.target.value;
+		const newInfo = { ...bookingInfo };
+		newInfo[field] = value;
+		setBookingInfo(newInfo);
+	};
 
 	const handleBooking = (e) => {
-		alert("Successfully Booked!");
-		handleCloseBooking();
+		// collect data
+		const appointment = {
+			...bookingInfo,
+			time,
+			serviceName: name,
+			date: date.toLocaleDateString(),
+		};
+
+		// send to server
+		fetch("http://localhost:5000/appointments", {
+			method: "POST",
+			headers: {
+				"content-type": "application/json",
+			},
+			body: JSON.stringify(appointment),
+		})
+			.then((res) => res.json())
+			.then((data) => {
+				if (data.insertedId) {
+					setBookingSuccess(true);
+					handleCloseBooking();
+				}
+			});
+
 		e.preventDefault();
 	};
 	return (
@@ -67,27 +104,33 @@ const BookingModal = ({
 								sx={{ width: "100%", m: 1 }}
 							/>
 							<TextField
+								sx={{ width: "100%", m: 1 }}
+								size="small"
 								id="outlined-size-small"
 								defaultValue={user?.displayName}
-								size="small"
-								sx={{ width: "100%", m: 1 }}
+								name="patientName"
+								onBlur={handleOnBlur}
 							/>
 							<TextField
+								sx={{ width: "100%", m: 1 }}
 								id="outlined-size-small"
-								defaultValue={user?.email}
 								size="small"
-								sx={{ width: "100%", m: 1 }}
+								defaultValue={user?.email}
+								name="email"
+								onBlur={handleOnBlur}
 							/>
 							<TextField
+								sx={{ width: "100%", m: 1 }}
+								size="small"
 								id="outlined-size-small"
 								placeholder="Phone Number"
-								size="small"
-								sx={{ width: "100%", m: 1 }}
+								name="phone"
+								onBlur={handleOnBlur}
 							/>
 							<TextField
 								disabled
 								id="outlined-size-small"
-								defaultValue={date}
+								defaultValue={date.toDateString()}
 								size="small"
 								sx={{ width: "100%", m: 1 }}
 							/>
