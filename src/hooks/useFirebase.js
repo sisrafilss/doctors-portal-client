@@ -7,6 +7,7 @@ import {
 	GoogleAuthProvider,
 	signInWithPopup,
 	updateProfile,
+	getIdToken,
 } from "firebase/auth";
 import { useEffect, useState } from "react";
 
@@ -18,6 +19,8 @@ const useFirebase = () => {
 	const [user, setUser] = useState({});
 	const [isLoading, setIsLoading] = useState(true);
 	const [authError, setAuthError] = useState("");
+	const [admin, setAdmin] = useState(false);
+	const [token, setToken] = useState("");
 	const auth = getAuth();
 
 	// Register new user using Email & Password
@@ -25,14 +28,21 @@ const useFirebase = () => {
 		setIsLoading(true);
 		createUserWithEmailAndPassword(auth, email, password)
 			.then((result) => {
-				setUser(result.user);
 				setAuthError("");
+
+				// Set user to user state
+				const newUser = { email, displayName: name };
+				setUser(newUser);
+
+				// saved user to database
+				saveUser(email, name, "POST");
+
 				// Set namae to firebase
 				updateProfile(auth.currentUser, {
 					displayName: name,
 				})
-					.then(() => {})
-					.catch((error) => {});
+					.then(() => { })
+					.catch((error) => { });
 				history.replace("/");
 			})
 			.catch((error) => {
@@ -70,8 +80,11 @@ const useFirebase = () => {
 
 		signInWithPopup(auth, googleProvider)
 			.then((result) => {
-				setUser(result.user);
+				const user = result.user;
+				setUser(user);
 				setAuthError("");
+				// save user info to database
+				saveUser(user.email, user.displayName, "PUT");
 				const destination = location?.state?.from || "/";
 				history.replace(destination);
 			})
@@ -84,19 +97,29 @@ const useFirebase = () => {
 			});
 	};
 
-	// Obserbe user login or logout
+	// Obserbe user state (login or logout)
 	useEffect(() => {
 		const unsubscribe = onAuthStateChanged(auth, (user) => {
 			if (user) {
 				setUser(user);
 				setAuthError("");
+				getIdToken(user).then((idToken) => {
+					setToken(idToken);
+				});
 			} else {
 				setUser({});
 			}
 			setIsLoading(false);
 		});
 		return () => unsubscribe;
-	}, []);
+	}, [auth]);
+
+	// Checking if user role is admin or not
+	useEffect(() => {
+		fetch(`http://localhost:5000/users/${user?.email}`)
+			.then((res) => res.json())
+			.then((data) => setAdmin(data?.admin));
+	}, [user]);
 
 	// Sign Out User
 	const logOut = () => {
@@ -109,10 +132,26 @@ const useFirebase = () => {
 			});
 	};
 
+	// Save user to database
+	const saveUser = (email, displayName, method) => {
+		const user = { email, displayName };
+		fetch("http://localhost:5000/users", {
+			method: method,
+			headers: {
+				"content-type": "application/json",
+			},
+			body: JSON.stringify(user),
+		})
+			.then((res) => res.json())
+			.then((data) => { });
+	};
+
 	return {
 		user,
 		isLoading,
 		authError,
+		admin,
+		token,
 		registerUser,
 		loginUser,
 		logOut,

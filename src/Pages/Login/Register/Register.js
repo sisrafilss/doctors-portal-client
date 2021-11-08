@@ -95,7 +95,7 @@ const Register = () => {
 										textTransform: "capitalize",
 									}}
 								>
-									Sign In
+									Sign Up
 								</Button>
 							</form>
 							<NavLink

@@ -1,8 +1,6 @@
-import { Container, Grid, Paper, Typography } from "@mui/material";
+import { Container, Grid, Typography } from "@mui/material";
 import { Box } from "@mui/system";
 import React from "react";
-import Avatar from "@mui/material/Avatar";
-import Stack from "@mui/material/Stack";
 import people1 from "../../../images/people-1.png";
 import people2 from "../../../images/people-2.png";
 import people3 from "../../../images/people-3.png";

@@ -15,17 +15,26 @@ import MailIcon from "@mui/icons-material/Mail";
 import MenuIcon from "@mui/icons-material/Menu";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import { Button, Grid } from "@mui/material";
-import Calendar from "../Shared/Calendar/Calendar";
-import Appointments from "./Appointments/Appointments";
-import { Link } from "react-router-dom";
+import { Button } from "@mui/material";
+import DashboardHome from "../DashboardHome/DashboardHome";
+import {
+	Switch,
+	Route,
+	Link,
+	useRouteMatch,
+} from "react-router-dom";
+import MakeAdmin from "../MakeAdmin/MakeAdmin";
+import AddDoctor from "../AddDoctor/AddDoctor";
+import useAuth from "../../../hooks/useAuth";
+import AdminRoute from "../../Login/AdminRoute/AdminRoute";
 
 const drawerWidth = 200;
 
-function DashBoard(props) {
+function Dashboard(props) {
 	const { window } = props;
 	const [mobileOpen, setMobileOpen] = React.useState(false);
-	const [date, setDate] = React.useState(new Date());
+	const { admin } = useAuth();
+	let { path, url } = useRouteMatch();
 
 	const handleDrawerToggle = () => {
 		setMobileOpen(!mobileOpen);
@@ -38,6 +47,20 @@ function DashBoard(props) {
 			<Link to="/appoinment">
 				<Button color="inherit">Appoinment</Button>
 			</Link>
+			<Link to={`${url}`}>
+				<Button color="inherit">Dashboard</Button>
+			</Link>
+			{admin && (
+				<Box>
+					<Link to={`${url}/make-admin`}>
+						<Button color="inherit">Make Admin</Button>
+					</Link>
+					<Link to={`${url}/add-doctor`}>
+						<Button color="inherit">Add Doctor</Button>
+					</Link>
+				</Box>
+			)}
+
 			<List>
 				{["Inbox", "Starred", "Send email", "Drafts"].map((text, index) => (
 					<ListItem button key={text}>
@@ -84,7 +107,6 @@ function DashBoard(props) {
 				sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
 				aria-label="mailbox folders"
 			>
-				{/* The implementation can be swapped with js to avoid SEO duplication of links. */}
 				<Drawer
 					container={container}
 					variant="temporary"
@@ -126,22 +148,26 @@ function DashBoard(props) {
 				}}
 			>
 				<Toolbar />
+				{/* DashBoard HOme */}
 				<Box>
-					<Grid container spacing={2}>
-						<Grid item xm={12} sm={12} md={5}>
-							<Calendar date={date} setDate={setDate} />
-						</Grid>
-						<Grid item xm={12} sm={12} md={7}>
-							<Appointments date={date} />
-						</Grid>
-					</Grid>
+					<Switch>
+						<Route exact path={path}>
+							<DashboardHome />
+						</Route>
+						<AdminRoute exact path={`${path}/make-admin`}>
+							<MakeAdmin />
+						</AdminRoute>
+						<AdminRoute path={`${path}/add-doctor`}>
+							<AddDoctor />
+						</AdminRoute>
+					</Switch>
 				</Box>
 			</Box>
 		</Box>
 	);
 }
 
-DashBoard.propTypes = {
+Dashboard.propTypes = {
 	/**
 	 * Injected by the documentation to work in an iframe.
 	 * You won't need it on your project.
@@ -149,4 +175,4 @@ DashBoard.propTypes = {
 	window: PropTypes.func,
 };
 
-export default DashBoard;
+export default Dashboard;

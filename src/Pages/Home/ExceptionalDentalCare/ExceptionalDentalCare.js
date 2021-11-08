@@ -5,7 +5,7 @@ import dentalCare from "../../../images/treatment.png";
 
 const verticalCenter = {
   minHeight: 500,
-//   height: "100vh",
+  //   height: "100vh",
   display: "flex",
   alignItems: "center",
 };
@@ -20,8 +20,8 @@ const ExceptionalDentalCare = () => {
           dispaly: "flex",
           alignItems: "center",
           justifyContent: "center",
+          flexGrow: 1
         }}
-        sx={{ flexGrow: 1 }}
       >
         <Grid container spacing={2}>
           <Grid item xm={12} sm={12} md={6}>
